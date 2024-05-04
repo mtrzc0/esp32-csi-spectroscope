@@ -93,3 +93,6 @@ venv/
 
 # CLion
 .idea/
+
+# cmake
+cmake-build-*/

@@ -1,2 +1,3 @@
-idf_component_register(SRC_DIRS "."
-                       INCLUDE_DIRS ".")
+idf_components_register(SRCS "main.c"
+                    INCLUDE_DIRS "../components/"
+                    REQUIRES nvs_flash)

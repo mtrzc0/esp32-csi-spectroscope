@@ -1,0 +1,8 @@
+//
+// Created by mateusz on 5/1/24.
+//
+
+#ifndef ESP_CSI_SENSOR_FUSION_RECV_MANAGER_H
+#define ESP_CSI_SENSOR_FUSION_RECV_MANAGER_H
+
+#endif //ESP_CSI_SENSOR_FUSION_RECV_MANAGER_H
