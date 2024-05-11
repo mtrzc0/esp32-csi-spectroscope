@@ -3,17 +3,15 @@
 cmake_minimum_required(VERSION 3.5)
 add_compile_options(-fdiagnostics-color=always)
 
-include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+set(CMAKE_FIND_ROOT_PATH $ENV{HOME}/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/)
+set(CMAKE_CXX_COMPILER  $ENV{HOME}/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin/xtensa-esp32-elf-g++)
+set(CMAKE_C_COMPILER  $ENV{HOME}/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc)
+set(CMAKE_ASM_COMPILER  $ENV{HOME}/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc)
 
-project(esp-csi-sensor-fusion)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(esp-csi-sensors)
 
 #show all environment variables
-execute_process(
-        COMMAND ${CMAKE_COMMAND} -E environment
-)
-#message("EXTRA_COMPONENT_DIRS: " ${EXTRA_COMPONENT_DIRS})
-
-#string(REGEX REPLACE ".*/\(.*\)" "\\1" CURDIR temp/csi_recv)
-
-#git_describe(PROJECT_VERSION ${COMPONENT_DIR})
-#message("Project commit: " ${PROJECT_VERSION})
+#execute_process(
+#        COMMAND ${CMAKE_COMMAND} -E environment
+#)

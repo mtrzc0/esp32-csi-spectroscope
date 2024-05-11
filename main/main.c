@@ -1,3 +1,8 @@
-//
-// Created by mateusz on 5/1/24.
-//
+#include <esp_log.h>
+
+const char* main_tag = "app";
+
+void app_main()
+{
+	ESP_LOGD(main_tag, "test");
+}
