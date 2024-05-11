@@ -7,8 +7,9 @@
 
 const char *init_tag = "init_manager";
 
-void run_init_manager()
+void run_init_manager(void *arg)
 {
+    (void)arg;
     ESP_LOGD(init_tag, "Initializing modules.");
     // //Initialize NVS
     // esp_err_t ret = nvs_flash_init();
@@ -20,4 +21,5 @@ void run_init_manager()
     //
     // wifi_init();
     // wifi_csi_init();
+    vTaskDelete(NULL);
 }
