@@ -8,6 +8,7 @@ set(CMAKE_CXX_COMPILER  $ENV{HOME}/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20
 set(CMAKE_C_COMPILER  $ENV{HOME}/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc)
 set(CMAKE_ASM_COMPILER  $ENV{HOME}/.espressif/tools/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc)
 
+include_directories($ENV{IDF_PATH}/components/.)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(esp-csi-sensors)
 
