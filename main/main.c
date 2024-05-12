@@ -20,7 +20,7 @@ const char* main_tag = "app_tag";
  * @param event_id The ID of the event. This function handles events with the IDs INIT_MANAGER_SUCCESS_EVENT and INIT_MANAGER_FAIL_EVENT.
  * @param event_data A pointer to the event data. This is not used in this function.
  */
-static void init_manager_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
+static void init_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
 	(void) arg;
 	(void) event_data;
@@ -44,9 +44,9 @@ void app_main()
 	ESP_LOGD(main_tag, "Creating system event loop.");
 
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
-	ESP_ERROR_CHECK(esp_event_handler_instance_register(APP_MAIN_EVENTS, ESP_EVENT_ANY_ID, init_manager_handler, NULL, NULL));
+	ESP_ERROR_CHECK(esp_event_handler_instance_register(APP_MAIN_EVENTS, ESP_EVENT_ANY_ID, init_handler, NULL, NULL));
 
-	BaseType_t init_manager_ret = xTaskCreate(run_init_manager, main_tag, configMINIMAL_STACK_SIZE + 2048, NULL, RUN_INIT_MANAGER_TP, NULL);
+	BaseType_t init_manager_ret = xTaskCreate(run_init, main_tag, configMINIMAL_STACK_SIZE + 2048, NULL, INIT_MANAGER_TP, NULL);
 	if (init_manager_ret != pdPASS)
 		esp_event_post(APP_MAIN_EVENTS, INIT_MANAGER_FAIL_EVENT, NULL, 0, portMAX_DELAY);
 	else
