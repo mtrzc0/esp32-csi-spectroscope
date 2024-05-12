@@ -9,14 +9,25 @@ ESP_EVENT_DEFINE_BASE(APP_MAIN_EVENTS);
 
 const char* main_tag = "app_tag";
 
-static void init_manager_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
+/**
+ * @brief Event handler for the initialization manager.
+ *
+ * This function is an event handler for the initialization manager. It is called when an event is posted to the APP_MAIN_EVENTS event base.
+ * It handles two types of events: INIT_MANAGER_SUCCESS_EVENT and INIT_MANAGER_FAIL_EVENT. For any other event, it logs a warning message.
+ *
+ * @param arg A pointer to the argument data for the event. This is not used in this function.
+ * @param event_base The base of the event. This function only handles events with the base APP_MAIN_EVENTS.
+ * @param event_id The ID of the event. This function handles events with the IDs INIT_MANAGER_SUCCESS_EVENT and INIT_MANAGER_FAIL_EVENT.
+ * @param event_data A pointer to the event data. This is not used in this function.
+ */
+static void init_manager_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 {
 	(void) arg;
 	(void) event_data;
 	if (event_base == APP_MAIN_EVENTS) {
 		switch (event_id) {
 		case INIT_MANAGER_SUCCESS_EVENT:
-			ESP_LOGD(main_tag, "Init manager success.");
+			ESP_LOGI(main_tag, "Init manager success.");
 			break;
 		case INIT_MANAGER_FAIL_EVENT:
 			ESP_LOGE(main_tag, "Init manager failed.");
@@ -33,7 +44,7 @@ void app_main()
 	ESP_LOGD(main_tag, "Creating system event loop.");
 
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
-	ESP_ERROR_CHECK(esp_event_handler_instance_register(APP_MAIN_EVENTS, INIT_MANAGER_RUN_EVENT, init_manager_handler, NULL, NULL));
+	ESP_ERROR_CHECK(esp_event_handler_instance_register(APP_MAIN_EVENTS, ESP_EVENT_ANY_ID, init_manager_handler, NULL, NULL));
 
 	BaseType_t init_manager_ret = xTaskCreate(run_init_manager, main_tag, configMINIMAL_STACK_SIZE + 2048, NULL, RUN_INIT_MANAGER_TP, NULL);
 	if (init_manager_ret != pdPASS)

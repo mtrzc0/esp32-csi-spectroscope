@@ -46,7 +46,7 @@ static void wifi_init()
     ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CONFIG_CSI_SEND_MAC));
 }
 
-void app_main()
+void send_csi(void *arg)
 {
     /**
      * @breif Initialize NVS
