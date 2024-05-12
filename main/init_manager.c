@@ -8,6 +8,7 @@
 #include "init_manager.h"
 #include "main.h"
 #include "task_prio.h"
+#include "recv_manager.h"
 
 ESP_EVENT_DEFINE_BASE(INIT_MANAGER_EVENTS);
 
@@ -34,6 +35,28 @@ void wifi_init_task(void *arg)
     // TODO: add the channel and MAC address configuration to the menuconfig
     // ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_LESS_INTERFERENCE_CHANNEL, WIFI_SECOND_CHAN_BELOW));
     // ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CONFIG_CSI_SEND_MAC));
+    vTaskDelete(NULL);
+}
+
+void csi_init_task(void *arg)
+{
+    (void)arg;
+    ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
+    // ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(g_wifi_radar_config->wifi_sniffer_cb));
+
+    /**< default config */
+    wifi_csi_config_t cfg = {
+        .lltf_en           = true,
+        .htltf_en          = true,
+        .stbc_htltf2_en    = true,
+        .ltf_merge_en      = true,
+        .channel_filter_en = true,
+        .manu_scale        = false,
+        .shift             = false,
+    };
+    ESP_ERROR_CHECK(esp_wifi_set_csi_config(&cfg));
+    ESP_ERROR_CHECK(esp_wifi_set_csi_rx_cb(csi_recv_task, NULL));
+    ESP_ERROR_CHECK(esp_wifi_set_csi(true));
     vTaskDelete(NULL);
 }
 
@@ -83,6 +106,12 @@ static void inits_handler(void *arg, esp_event_base_t event_base, int32_t event_
         case ESP_NOW_INIT_FAIL_EVENT:
             ESP_LOGE(init_tag, "ESP NOW init failed.");
             break;
+        case CSI_INIT_SUCCESS_EVENT:
+            ESP_LOGI(init_tag, "CSI init success.");
+            break;
+        case CSI_INIT_FAIL_EVENT:
+            ESP_LOGE(init_tag, "CSI init failed.");
+            break;
         default:
             ESP_LOGW(init_tag, "Unknown event");
             break;
@@ -90,7 +119,7 @@ static void inits_handler(void *arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
-void run_init(void *arg)
+void run_init_task(void *arg)
 {
     (void)arg;
     ESP_LOGD(init_tag, "Initializing modules.");

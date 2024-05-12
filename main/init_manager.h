@@ -9,7 +9,7 @@
  *
  * @param arg A pointer to the argument data for the initialization manager. The exact usage of this argument depends on the implementation of the initialization manager.
  */
-void run_init(void *arg);
+void run_init_task(void *arg);
 
 ESP_EVENT_DECLARE_BASE(INIT_MANAGER_EVENTS);
 
@@ -29,5 +29,7 @@ typedef enum {
 void wifi_init_task(void *arg);
 // TODO: document this function
 void csi_init_task(void *arg);
+// TODO: document this function
+void nvs_init_task(void *arg);
 
 #endif //ESP_CSI_SENSOR_FUSION_INIT_MANAGER_H
