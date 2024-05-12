@@ -125,9 +125,9 @@ void run_init_task(void *arg)
     ESP_LOGD(init_tag, "Initializing modules.");
     // TODO: Initialize modules here.
     // [X] WIFI
-    // [ ] CSI
-    // [ ] NVS
-    // [ ] ESP NOW
+    // [X] CSI
+    // [ ] NVS ?
+    // [X] ESP NOW
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(INIT_MANAGER_EVENTS, ESP_EVENT_ANY_ID, inits_handler, NULL, NULL));
 
@@ -144,6 +144,12 @@ void run_init_task(void *arg)
     else
         esp_event_post(INIT_MANAGER_EVENTS, ESP_NOW_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 
+    BaseType_t csi_ret = xTaskCreate(csi_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, CSI_INIT_TP, NULL);
+    if (csi_ret != pdPASS)
+        esp_event_post(INIT_MANAGER_EVENTS, CSI_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
+    else
+        esp_event_post(INIT_MANAGER_EVENTS, CSI_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
+
     
     // esp_err_t ret = nvs_flash_init();
     // if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -151,9 +157,6 @@ void run_init_task(void *arg)
     //     ret = nvs_flash_init();
     // }
     // ESP_ERROR_CHECK(ret);
-    //
-    // wifi_init();
-    // wifi_csi_init();
 
     esp_event_post(APP_MAIN_EVENTS, INIT_MANAGER_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
     vTaskDelete(NULL);

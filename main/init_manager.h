@@ -23,7 +23,7 @@ typedef enum {
     ESP_NOW_INIT_SUCCESS_EVENT,
     ESP_NOW_INIT_FAIL_EVENT,
     INIT_MANAGER_ANY_EVENT,
-};
+} init_manager_events_t;
 
 // TODO: document this function
 void wifi_init_task(void *arg);
