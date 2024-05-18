@@ -16,27 +16,23 @@ static const char *csi_send_tag = "send_manager";
 #define CONFIG_LESS_INTERFERENCE_CHANNEL    11
 #define CONFIG_SEND_FREQUENCY               100
 
-#define MAC_STR_TO_HEX_ARRAY(mac_str, mac_hex) \
-sscanf((mac_str), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(mac_hex)[0], &(mac_hex)[1], &(mac_hex)[2], &(mac_hex)[3], &(mac_hex)[4], &(mac_hex)[5])
-
-static uint8_t CSI_SEND_MAC[6];
+static uint8_t CSI_SEND_MAC[6] = CONFIG_CSI_SEND_MAC;
 
 void csi_send_task(void *arg)
 {
     (void)arg;
 
-    MAC_STR_TO_HEX_ARRAY(CONFIG_CSI_SEND_MAC, CSI_SEND_MAC);
-
     // TODO: add PMK to the menuconfig
     //ESP_ERROR_CHECK(esp_now_set_pmk((uint8_t *)"pmk1234567890123"));
 
-    esp_now_peer_info_t peer = {
+    esp_now_peer_info_t recv_peer = {
         .channel   = CONFIG_LESS_INTERFERENCE_CHANNEL,
         .ifidx     = WIFI_IF_STA,    
-        .encrypt   = false,   
-        .peer_addr = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+        .encrypt   = false,
+        .peer_addr = CONFIG_CSI_RECV_MAC, // TEST IF MAC CAN BE string
     };
-    ESP_ERROR_CHECK(esp_now_add_peer(&peer));
+
+    ESP_ERROR_CHECK(esp_now_add_peer(&recv_peer));
 
     ESP_LOGI(csi_send_tag, "================ CSI SEND ================");
     ESP_LOGI(csi_send_tag, "wifi_channel: %d, send_frequency: %d, mac: " MACSTR,
@@ -44,7 +40,7 @@ void csi_send_task(void *arg)
 
     for (uint8_t count = 0; ;++count)
     {
-        esp_err_t ret = esp_now_send(peer.peer_addr, &count, sizeof(uint8_t));
+        esp_err_t ret = esp_now_send(recv_peer.peer_addr, &count, sizeof(uint8_t));
 
         if(ret != ESP_OK)
         {

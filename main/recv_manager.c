@@ -15,15 +15,10 @@ static const char *csi_recv_tag = "recv_manager";
 #define CONFIG_LESS_INTERFERENCE_CHANNEL    11
 #define CONFIG_SEND_FREQUENCY               100
 
-#define MAC_STR_TO_HEX_ARRAY(mac_str, mac_hex) \
-sscanf((mac_str), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(mac_hex)[0], &(mac_hex)[1], &(mac_hex)[2], &(mac_hex)[3], &(mac_hex)[4], &(mac_hex)[5])
-
-static uint8_t CSI_SEND_MAC[6];
+static uint8_t CSI_SEND_MAC[6] = CONFIG_CSI_SEND_MAC;
 
 void csi_recv_cb(void *ctx, wifi_csi_info_t *info)
 {
-    MAC_STR_TO_HEX_ARRAY(CONFIG_CSI_SEND_MAC, CSI_SEND_MAC);
-
     if (!info || !info->buf)
     {
         ESP_LOGW(csi_recv_tag, "<%s> wifi_csi_cb", esp_err_to_name(ESP_ERR_INVALID_ARG));

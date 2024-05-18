@@ -31,13 +31,17 @@ void wifi_init_task(void *arg)
     ESP_ERROR_CHECK(esp_wifi_set_bandwidth(ESP_IF_WIFI_STA, WIFI_BW_HT40));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    // TODO: instead of this add esp_now_set_peer_rate to esp_now_init [X]
-    // ESP_ERROR_CHECK(esp_wifi_config_espnow_rate(ESP_IF_WIFI_STA, WIFI_PHY_RATE_MCS0_SGI));
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
 
     // TODO: add the channel and MAC address configuration to the menuconfig
     // ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_LESS_INTERFERENCE_CHANNEL, WIFI_SECOND_CHAN_BELOW));
-    // ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CONFIG_CSI_SEND_MAC));
+
+#if defined CONFIG_CSI_APP_SENDER
+    ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CONFIG_CSI_SEND_MAC));
+#elif defined CONFIG_CSI_APP_RECEIVER
+    ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CONFIG_CSI_RECV_MAC));
+#endif
+
     vTaskDelete(NULL);
 }
 
@@ -167,6 +171,12 @@ void run_init_task(void *arg)
         esp_event_post(INIT_MANAGER_EVENTS, CSI_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
     else
         esp_event_post(INIT_MANAGER_EVENTS, CSI_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
+
+    BaseType_t nvs_ret = xTaskCreate(nvs_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, NVS_INIT_TP, NULL);
+    if (nvs_ret != pdPASS)
+        esp_event_post(INIT_MANAGER_EVENTS, NVS_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
+    else
+        esp_event_post(INIT_MANAGER_EVENTS, NVS_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 
     
     // esp_err_t ret = nvs_flash_init();
