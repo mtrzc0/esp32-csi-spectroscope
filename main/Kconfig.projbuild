@@ -23,17 +23,16 @@ menu "CSI config"
     endchoice
 
     config CSI_SENDER_MAC
-        string "Sender MAC"
-        default "00:00:00:00:00:XX"
-        depends on CSI_APP_SENDER
+        string "Sender MAC address"
+        default "00:00:00:00:00:00"
+        depends on CSI_APP_TYPE_SENDER
         help
-          Sender MAC address
+          Set MAC address while compiling application for sender device
 
     config CSI_RECEIVER_MAC
-        string "Receiver MAC"
-        default "00:00:00:00:00:XX"
-        depends on CSI_APP_RECEIVER
+        string "Receiver MAC address"
+        default "00:00:00:00:00:00"
+        depends on CSI_APP_TYPE_RECEIVER
         help
-          Receiver MAC address
-
+            Set MAC address while compiling application for receiver device
 endmenu
