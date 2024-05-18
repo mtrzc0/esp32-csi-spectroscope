@@ -1,7 +1,7 @@
 if(CONFIG_CSI_APP_TYPE_SENDER)
     set(SRCS "send_manager.c")
 elseif (CONFIG_CSI_APP_TYPE_RECEIVER)
-    set(SRCS "receive_manager.c")
+    set(SRCS "recv_manager.c")
 else()
     set(SRCS "")
 endif()
