@@ -8,7 +8,10 @@
 #include "init_manager.h"
 #include "main.h"
 #include "task_prio.h"
+
+#if defined CONFIG_CSI_APP_SENDER || defined CONFIG_CSI_APP_RECEIVER
 #include "recv_manager.h"
+#endif
 
 ESP_EVENT_DEFINE_BASE(INIT_MANAGER_EVENTS);
 
@@ -41,6 +44,7 @@ void wifi_init_task(void *arg)
 void csi_init_task(void *arg)
 {
     (void)arg;
+#if defined CONFIG_CSI_APP_SENDER || defined CONFIG_CSI_APP_RECEIVER
     ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
     // ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(g_wifi_radar_config->wifi_sniffer_cb));
 
@@ -57,6 +61,7 @@ void csi_init_task(void *arg)
     ESP_ERROR_CHECK(esp_wifi_set_csi_config(&cfg));
     ESP_ERROR_CHECK(esp_wifi_set_csi_rx_cb(csi_recv_task, NULL));
     ESP_ERROR_CHECK(esp_wifi_set_csi(true));
+#endif
     vTaskDelete(NULL);
 }
 

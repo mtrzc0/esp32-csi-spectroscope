@@ -1,0 +1,39 @@
+menu "CSI config"
+
+    choice
+
+        prompt "Select the CSI App type"
+        default CSI_APP_TYPE_DEFAULT
+
+        config CSI_APP_TYPE_DEFAULT
+            bool "Default"
+            help
+              No CSI App type selected (init manager only)
+
+        config CSI_APP_TYPE_SENDER
+            bool "Sender"
+            help
+              Sender CSI App type
+
+        config CSI_APP_TYPE_RECEIVER
+            bool "Receiver"
+            help
+              Receiver CSI App type
+
+    endchoice
+
+    config CSI_SENDER_MAC
+        string "Sender MAC"
+        default "00:00:00:00:00:XX"
+        depends on CSI_APP_SENDER
+        help
+          Sender MAC address
+
+    config CSI_RECEIVER_MAC
+        string "Receiver MAC"
+        default "00:00:00:00:00:XX"
+        depends on CSI_APP_RECEIVER
+        help
+          Receiver MAC address
+
+endmenu
