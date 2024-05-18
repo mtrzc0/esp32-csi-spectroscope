@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "nvs_flash.h"
-
 #include "esp_mac.h"
 #include "esp_log.h"
 #include "esp_wifi.h"
@@ -29,7 +27,7 @@ void csi_send_task(void *arg)
         .channel   = CONFIG_LESS_INTERFERENCE_CHANNEL,
         .ifidx     = WIFI_IF_STA,    
         .encrypt   = false,
-        .peer_addr = CONFIG_CSI_RECV_MAC, // TEST IF MAC CAN BE string
+        .peer_addr = CONFIG_CSI_RECV_MAC, // THIS MAC IS IN STRING FORMAT "ABCDEF"
     };
 
     ESP_ERROR_CHECK(esp_now_add_peer(&recv_peer));
@@ -43,10 +41,9 @@ void csi_send_task(void *arg)
         esp_err_t ret = esp_now_send(recv_peer.peer_addr, &count, sizeof(uint8_t));
 
         if(ret != ESP_OK)
-        {
             ESP_LOGW(csi_send_tag, "<%s> ESP-NOW send error", esp_err_to_name(ret));
-        }
 
-        usleep(1000 * 1000 / CONFIG_SEND_FREQUENCY);
+        vTaskDelay(CONFIG_SEND_FREQUENCY / portTICK_PERIOD_MS);
     }
+    vTaskDelete(NULL);
 }

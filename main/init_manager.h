@@ -16,8 +16,8 @@ ESP_EVENT_DECLARE_BASE(INIT_MANAGER_EVENTS);
 typedef enum {
     WIFI_INIT_SUCCESS_EVENT,
     WIFI_INIT_FAIL_EVENT,
-    CSI_INIT_SUCCESS_EVENT,
-    CSI_INIT_FAIL_EVENT,
+    CSI_RECV_INIT_SUCCESS_EVENT,
+    CSI_RECV_INIT_FAIL_EVENT,
     NVS_INIT_SUCCESS_EVENT,
     NVS_INIT_FAIL_EVENT,
     ESP_NOW_INIT_SUCCESS_EVENT,
@@ -28,8 +28,10 @@ typedef enum {
 // TODO: document this function
 void wifi_init_task(void *arg);
 // TODO: document this function
-void csi_init_task(void *arg);
+void csi_recv_init_task(void *arg);
 // TODO: document this function
 void nvs_init_task(void *arg);
+// TODO: document this function
+void esp_now_init_task(void *arg);
 
 #endif //ESP_CSI_SENSOR_FUSION_INIT_MANAGER_H

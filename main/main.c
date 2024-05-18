@@ -5,6 +5,10 @@
 #include "init_manager.h"
 #include "task_prio.h"
 
+#if defined CONFIG_CSI_APP_TYPE_SENDER
+#include "send_manager.h"
+#endif
+
 ESP_EVENT_DEFINE_BASE(APP_MAIN_EVENTS);
 
 const char* main_tag = "main";
@@ -28,6 +32,11 @@ static void init_handler(void* arg, esp_event_base_t event_base, int32_t event_i
 		switch (event_id) {
 		case INIT_MANAGER_SUCCESS_EVENT:
 			ESP_LOGI(main_tag, "Init manager success.");
+#if defined CONFIG_CSI_APP_TYPE_SENDER
+			BaseType_t sender_ret = xTaskCreate(csi_send_task, main_tag, configMINIMAL_STACK_SIZE + 2048, NULL, CSI_SEND_TP, NULL);
+			if (sender_ret != pdPASS)
+				ESP_LOGE(main_tag, "CSI send task creation failed.");
+#endif
 			break;
 		case INIT_MANAGER_FAIL_EVENT:
 			ESP_LOGE(main_tag, "Init manager failed.");

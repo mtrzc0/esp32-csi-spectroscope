@@ -9,7 +9,7 @@
 #include "main.h"
 #include "task_prio.h"
 
-#if defined CONFIG_CSI_APP_SENDER || defined CONFIG_CSI_APP_RECEIVER
+#if defined CONFIG_CSI_APP_RECEIVER
 #include "recv_manager.h"
 #endif
 
@@ -45,10 +45,10 @@ void wifi_init_task(void *arg)
     vTaskDelete(NULL);
 }
 
-void csi_init_task(void *arg)
+void csi_recv_init_task(void *arg)
 {
     (void)arg;
-#if defined CONFIG_CSI_APP_SENDER || defined CONFIG_CSI_APP_RECEIVER
+#if defined CONFIG_CSI_APP_RECEIVER
     ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
     // ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(g_wifi_radar_config->wifi_sniffer_cb));
 
@@ -128,11 +128,11 @@ static void inits_handler(void *arg, esp_event_base_t event_base, int32_t event_
         case ESP_NOW_INIT_FAIL_EVENT:
             ESP_LOGE(init_tag, "ESP NOW init failed.");
             break;
-        case CSI_INIT_SUCCESS_EVENT:
-            ESP_LOGI(init_tag, "CSI init success.");
+        case CSI_RECV_INIT_SUCCESS_EVENT:
+            ESP_LOGI(init_tag, "CSI recv init success.");
             break;
-        case CSI_INIT_FAIL_EVENT:
-            ESP_LOGE(init_tag, "CSI init failed.");
+        case CSI_RECV_INIT_FAIL_EVENT:
+            ESP_LOGE(init_tag, "CSI recv init failed.");
             break;
         default:
             ESP_LOGW(init_tag, "Unknown event");
@@ -145,11 +145,6 @@ void run_init_task(void *arg)
 {
     (void)arg;
     ESP_LOGD(init_tag, "Initializing modules.");
-    // TODO: Initialize modules here.
-    // [X] WIFI
-    // [X] CSI
-    // [ ] NVS ?
-    // [X] ESP NOW
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(INIT_MANAGER_EVENTS, ESP_EVENT_ANY_ID, inits_handler, NULL, NULL));
 
@@ -166,25 +161,19 @@ void run_init_task(void *arg)
     else
         esp_event_post(INIT_MANAGER_EVENTS, ESP_NOW_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 
-    BaseType_t csi_ret = xTaskCreate(csi_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, CSI_INIT_TP, NULL);
-    if (csi_ret != pdPASS)
-        esp_event_post(INIT_MANAGER_EVENTS, CSI_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
-    else
-        esp_event_post(INIT_MANAGER_EVENTS, CSI_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
-
     BaseType_t nvs_ret = xTaskCreate(nvs_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, NVS_INIT_TP, NULL);
     if (nvs_ret != pdPASS)
         esp_event_post(INIT_MANAGER_EVENTS, NVS_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
     else
         esp_event_post(INIT_MANAGER_EVENTS, NVS_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 
-    
-    // esp_err_t ret = nvs_flash_init();
-    // if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    //     ESP_ERROR_CHECK(nvs_flash_erase());
-    //     ret = nvs_flash_init();
-    // }
-    // ESP_ERROR_CHECK(ret);
+ #if defined CONFIG_CSI_APP_RECEIVER
+    BaseType_t csi_ret = xTaskCreate(csi_recv_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, CSI_INIT_TP, NULL);
+    if (csi_ret != pdPASS)
+        esp_event_post(INIT_MANAGER_EVENTS, CSI_RECV_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
+    else
+        esp_event_post(INIT_MANAGER_EVENTS, CSI_RECV_INIT_SUCCESS_EVENT_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
+#endif
 
     esp_event_post(APP_MAIN_EVENTS, INIT_MANAGER_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
     vTaskDelete(NULL);

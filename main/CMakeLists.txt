@@ -1,12 +1,11 @@
 if(CONFIG_CSI_APP_TYPE_SENDER)
-    set(SRCS "send_manager.c")
+    list(APPEND srcs "send_manager.c")
 elseif (CONFIG_CSI_APP_TYPE_RECEIVER)
-    set(SRCS "recv_manager.c")
-else()
-    set(SRCS "")
+    list(APPEND srcs "recv_manager.c")
 endif()
 
-idf_component_register(SRCS "main.c"
+idf_component_register(SRCS ${srcs}
+                            "main.c"
                             "init_manager.c"
                     INCLUDE_DIRS "."
                     REQUIRES nvs_flash esp_event esp_wifi)

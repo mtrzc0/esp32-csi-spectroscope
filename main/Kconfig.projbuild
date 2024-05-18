@@ -25,14 +25,12 @@ menu "CSI config"
     config CSI_SEND_MAC
         string "Sender MAC address"
         default "aaabbb"
-        depends on CSI_APP_TYPE_SENDER || CSI_APP_TYPE_RECEIVER
         help
           Set MAC address while compiling application for sender device
 
     config CSI_RECV_MAC
         string "Receiver MAC address"
         default "AAABBB"
-        depends on CSI_APP_TYPE_RECEIVER || CSI_APP_TYPE_SENDER
         help
             Set MAC address while compiling application for receiver device
 endmenu
