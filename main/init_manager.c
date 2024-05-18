@@ -59,7 +59,7 @@ void csi_init_task(void *arg)
         .shift             = false,
     };
     ESP_ERROR_CHECK(esp_wifi_set_csi_config(&cfg));
-    ESP_ERROR_CHECK(esp_wifi_set_csi_rx_cb(csi_recv_task, NULL));
+    ESP_ERROR_CHECK(esp_wifi_set_csi_rx_cb(csi_recv_cb, NULL));
     ESP_ERROR_CHECK(esp_wifi_set_csi(true));
 #endif
     vTaskDelete(NULL);

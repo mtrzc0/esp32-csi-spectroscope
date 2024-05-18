@@ -1,11 +1,3 @@
-/* Get Start Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,26 +11,25 @@
 #include "esp_netif.h"
 #include "esp_now.h"
 
+static const char *csi_send_tag = "send_manager";
 
 #define CONFIG_LESS_INTERFERENCE_CHANNEL    11
 #define CONFIG_SEND_FREQUENCY               100
 
-static const uint8_t CONFIG_CSI_SEND_MAC[] = {0x1a, 0x00, 0x00, 0x00, 0x00, 0x00};
-static const char *csi_send_tag = "send_manager";
+#define MAC_STR_TO_HEX_ARRAY(mac_str, mac_hex) \
+sscanf((mac_str), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(mac_hex)[0], &(mac_hex)[1], &(mac_hex)[2], &(mac_hex)[3], &(mac_hex)[4], &(mac_hex)[5])
+
+static uint8_t CSI_SEND_MAC[6];
 
 void csi_send_task(void *arg)
 {
-    /**
-     * @breif Initialize NVS
-     */
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
+    (void)arg;
 
-    ESP_ERROR_CHECK(esp_now_set_pmk((uint8_t *)"pmk1234567890123"));
+    MAC_STR_TO_HEX_ARRAY(CONFIG_CSI_SEND_MAC, CSI_SEND_MAC);
+
+    // TODO: add NVS init
+    // TODO: add PMK to the menuconfig
+    //ESP_ERROR_CHECK(esp_now_set_pmk((uint8_t *)"pmk1234567890123"));
 
     esp_now_peer_info_t peer = {
         .channel   = CONFIG_LESS_INTERFERENCE_CHANNEL,
@@ -50,12 +41,14 @@ void csi_send_task(void *arg)
 
     ESP_LOGI(csi_send_tag, "================ CSI SEND ================");
     ESP_LOGI(csi_send_tag, "wifi_channel: %d, send_frequency: %d, mac: " MACSTR,
-             CONFIG_LESS_INTERFERENCE_CHANNEL, CONFIG_SEND_FREQUENCY, MAC2STR(CONFIG_CSI_SEND_MAC));
+             CONFIG_LESS_INTERFERENCE_CHANNEL, CONFIG_SEND_FREQUENCY, MAC2STR(CSI_SEND_MAC));
 
-    for (uint8_t count = 0; ;++count) {
+    for (uint8_t count = 0; ;++count)
+    {
         esp_err_t ret = esp_now_send(peer.peer_addr, &count, sizeof(uint8_t));
 
-        if(ret != ESP_OK) {
+        if(ret != ESP_OK)
+        {
             ESP_LOGW(csi_send_tag, "<%s> ESP-NOW send error", esp_err_to_name(ret));
         }
 

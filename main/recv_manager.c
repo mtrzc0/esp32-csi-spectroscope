@@ -10,28 +10,36 @@
 #include "esp_netif.h"
 #include "esp_now.h"
 
+static const char *csi_recv_tag = "recv_manager";
+
 #define CONFIG_LESS_INTERFERENCE_CHANNEL    11
 #define CONFIG_SEND_FREQUENCY               100
 
-// TODO: add MAC address configuration to the menuconfig
-static const uint8_t CONFIG_CSI_SEND_MAC[] = {0x1a, 0x00, 0x00, 0x00, 0x00, 0x00};
-static const char *csi_recv_tag = "recv_manager";
+#define MAC_STR_TO_HEX_ARRAY(mac_str, mac_hex) \
+sscanf((mac_str), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(mac_hex)[0], &(mac_hex)[1], &(mac_hex)[2], &(mac_hex)[3], &(mac_hex)[4], &(mac_hex)[5])
 
-void csi_recv_task(void *ctx, wifi_csi_info_t *info)
+static uint8_t CSI_SEND_MAC[6];
+
+void csi_recv_cb(void *ctx, wifi_csi_info_t *info)
 {
-    if (!info || !info->buf) {
+    MAC_STR_TO_HEX_ARRAY(CONFIG_CSI_SEND_MAC, CSI_SEND_MAC);
+
+    if (!info || !info->buf)
+    {
         ESP_LOGW(csi_recv_tag, "<%s> wifi_csi_cb", esp_err_to_name(ESP_ERR_INVALID_ARG));
         return;
     }
 
-    if (memcmp(info->mac, CONFIG_CSI_SEND_MAC, 6)) {
+    if (memcmp(info->mac, CSI_SEND_MAC, 6))
+    {
         return;
     }
 
     static int s_count = 0;
     const wifi_pkt_rx_ctrl_t *rx_ctrl = &info->rx_ctrl;
 
-    if (!s_count) {
+    if (!s_count)
+    {
         ESP_LOGI(csi_recv_tag, "================ CSI RECV ================");
         ets_printf("type,id,mac,rssi,rate,sig_mode,mcs,bandwidth,smoothing,not_sounding,aggregation,stbc,fec_coding,sgi,noise_floor,ampdu_cnt,channel,secondary_channel,local_timestamp,ant,sig_len,rx_state,len,first_word,data\n");
     }
@@ -45,7 +53,8 @@ void csi_recv_task(void *ctx, wifi_csi_info_t *info)
 
     ets_printf(",%d,%d,\"[%d", info->len, info->first_word_invalid, info->buf[0]);
 
-    for (int i = 1; i < info->len; i++) {
+    for (int i = 1; i < info->len; i++)
+    {
         ets_printf(",%d", info->buf[i]);
     }
 
