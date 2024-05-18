@@ -27,7 +27,6 @@ void csi_send_task(void *arg)
 
     MAC_STR_TO_HEX_ARRAY(CONFIG_CSI_SEND_MAC, CSI_SEND_MAC);
 
-    // TODO: add NVS init
     // TODO: add PMK to the menuconfig
     //ESP_ERROR_CHECK(esp_now_set_pmk((uint8_t *)"pmk1234567890123"));
 
