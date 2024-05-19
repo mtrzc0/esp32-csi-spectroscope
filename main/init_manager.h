@@ -1,5 +1,5 @@
-#ifndef ESP_CSI_SENSOR_FUSION_INIT_MANAGER_H
-#define ESP_CSI_SENSOR_FUSION_INIT_MANAGER_H
+#ifndef ESP_CSI_INIT_MANAGER_H
+#define ESP_CSI_INIT_MANAGER_H
 
 /**
  * @brief Runs the initialization manager.
@@ -34,4 +34,4 @@ void nvs_init_task(void *arg);
 // TODO: document this function
 void esp_now_init_task(void *arg);
 
-#endif //ESP_CSI_SENSOR_FUSION_INIT_MANAGER_H
+#endif //ESP_CSI_INIT_MANAGER_H

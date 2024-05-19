@@ -1,4 +1,4 @@
-# CSI sensors project 
+# CSI spectroscope project 
 
 This is embedded application for material detection via WIFI CSI.
 Project is focused on analyzing data from both ESP32 microcontrollers working as receiver and sender.
