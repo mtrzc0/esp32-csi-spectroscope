@@ -54,7 +54,7 @@ void app_main()
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 	ESP_ERROR_CHECK(esp_event_handler_instance_register(APP_MAIN_EVENTS, ESP_EVENT_ANY_ID, init_handler, NULL, NULL));
 
-	BaseType_t init_manager_ret = xTaskCreate(run_init_task, main_tag, configMINIMAL_STACK_SIZE + 2048, NULL, INIT_MANAGER_TP, NULL);
+	BaseType_t init_manager_ret = xTaskCreatePinnedToCore(run_init_task, main_tag, configMINIMAL_STACK_SIZE + 2048, NULL, INIT_MANAGER_TP, NULL, 0);
 	if (init_manager_ret != pdPASS)
 		esp_event_post(APP_MAIN_EVENTS, INIT_MANAGER_FAIL_EVENT, NULL, 0, portMAX_DELAY);
 	else

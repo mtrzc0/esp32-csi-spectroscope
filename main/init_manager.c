@@ -20,18 +20,20 @@ const char *init_tag = "init_manager";
 void wifi_init_task(void *arg)
 {
     (void)arg;
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
 
     ESP_ERROR_CHECK(esp_netif_init());
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    wifi_init_config_t wifi_cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&wifi_cfg));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_bandwidth(ESP_IF_WIFI_STA, WIFI_BW_HT40));
     ESP_ERROR_CHECK(esp_wifi_start());
 
+    // TODO: Add rate if needed
+    // ESP_ERROR_CHECK(esp_wifi_config_espnow_rate(ESP_IF_WIFI_STA, WIFI_PHY_RATE_MCS0_SGI));
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+    ESP_ERROR_CHECK(esp_now_init());
 
     // TODO: add the channel and MAC address configuration to the menuconfig
     // ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_LESS_INTERFERENCE_CHANNEL, WIFI_SECOND_CHAN_BELOW));
@@ -66,20 +68,6 @@ void csi_recv_init_task(void *arg)
     ESP_ERROR_CHECK(esp_wifi_set_csi_rx_cb(csi_recv_cb, NULL));
     ESP_ERROR_CHECK(esp_wifi_set_csi(true));
 #endif
-    vTaskDelete(NULL);
-}
-
-void esp_now_init_task(void *arg)
-{
-    (void)arg;
-    // TODO: test if this is the right configuration
-    esp_now_rate_config_t cfg = {
-        .phymode = WIFI_PHY_MODE_11G,
-        .rate = WIFI_PHY_RATE_6M,
-    };
-    ESP_ERROR_CHECK(esp_now_set_peer_rate_config(ESP_IF_WIFI_STA, &cfg));
-    // must be last one
-    ESP_ERROR_CHECK(esp_now_init());
     vTaskDelete(NULL);
 }
 
@@ -122,12 +110,6 @@ static void inits_handler(void *arg, esp_event_base_t event_base, int32_t event_
         case WIFI_INIT_FAIL_EVENT:
             ESP_LOGE(init_tag, "WIFI init failed.");
             break;
-        case ESP_NOW_INIT_SUCCESS_EVENT:
-            ESP_LOGD(init_tag, "ESP NOW init success.");
-            break;
-        case ESP_NOW_INIT_FAIL_EVENT:
-            ESP_LOGE(init_tag, "ESP NOW init failed.");
-            break;
         case CSI_RECV_INIT_SUCCESS_EVENT:
             ESP_LOGI(init_tag, "CSI recv init success.");
             break;
@@ -144,24 +126,18 @@ static void inits_handler(void *arg, esp_event_base_t event_base, int32_t event_
 void run_init_task(void *arg)
 {
     (void)arg;
-    ESP_LOGD(init_tag, "Initializing modules.");
+    ESP_LOGI(init_tag, "Initializing modules.");
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(INIT_MANAGER_EVENTS, ESP_EVENT_ANY_ID, inits_handler, NULL, NULL));
 
     // create tasks for each module
-    BaseType_t wifi_ret = xTaskCreate(wifi_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, WIFI_INIT_TP, NULL);
+    BaseType_t wifi_ret = xTaskCreatePinnedToCore(wifi_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, WIFI_INIT_TP, NULL, 0);
     if (wifi_ret != pdPASS)
         esp_event_post(INIT_MANAGER_EVENTS, WIFI_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
     else
         esp_event_post(INIT_MANAGER_EVENTS, WIFI_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 
-    BaseType_t esp_now_ret = xTaskCreate(esp_now_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, ESP_NOW_INIT_TP, NULL);
-    if (esp_now_ret != pdPASS)
-        esp_event_post(INIT_MANAGER_EVENTS, ESP_NOW_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
-    else
-        esp_event_post(INIT_MANAGER_EVENTS, ESP_NOW_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
-
-    BaseType_t nvs_ret = xTaskCreate(nvs_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, NVS_INIT_TP, NULL);
+    BaseType_t nvs_ret = xTaskCreatePinnedToCore(nvs_init_task, init_tag, configMINIMAL_STACK_SIZE + 2048, NULL, NVS_INIT_TP, NULL, 0);
     if (nvs_ret != pdPASS)
         esp_event_post(INIT_MANAGER_EVENTS, NVS_INIT_FAIL_EVENT, NULL, 0, portMAX_DELAY);
     else
@@ -175,6 +151,5 @@ void run_init_task(void *arg)
         esp_event_post(INIT_MANAGER_EVENTS, CSI_RECV_INIT_SUCCESS_EVENT_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 #endif
 
-    esp_event_post(APP_MAIN_EVENTS, INIT_MANAGER_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
     vTaskDelete(NULL);
 }
