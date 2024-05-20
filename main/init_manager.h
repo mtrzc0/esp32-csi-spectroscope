@@ -23,7 +23,15 @@ typedef enum {
     INIT_MANAGER_ANY_EVENT,
 } init_manager_events_t;
 
-// TODO: document this function
+/**
+ * @brief Runs the WiFi initialization task.
+ *
+ * This function is responsible for running the WiFi initialization task. It is typically called by the initialization manager.
+ * The WiFi initialization task is responsible for setting up the necessary resources and state for the WiFi functionality of the application.
+ * @attention 3. The bit 0 of the first byte of MAC address can not be 1. For example, the MAC address
+ *      can set to be "1a:XX:XX:XX:XX:XX", but can not be "15:XX:XX:XX:XX:XX".
+ * @param arg A pointer to the argument data for the WiFi initialization task. The exact usage of this argument depends on the implementation of the WiFi initialization task.
+ */
 void wifi_init_task(void *arg);
 // TODO: document this function
 void csi_recv_init_task(void *arg);

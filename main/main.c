@@ -5,9 +5,7 @@
 #include "init_manager.h"
 #include "task_prio.h"
 
-#if defined CONFIG_CSI_APP_TYPE_SENDER
-#include "send_manager.h"
-#endif
+#include "csi_manager.h"
 
 ESP_EVENT_DEFINE_BASE(APP_MAIN_EVENTS);
 

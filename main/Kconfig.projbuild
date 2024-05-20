@@ -22,15 +22,15 @@ menu "CSI config"
 
     endchoice
 
-    config CSI_SEND_MAC
-        string "Sender MAC address"
-        default "aaabbb"
+    config LESS_INTERFERENCE_CHANNEL
+        int "Less interference channel"
+        default 11
         help
-          Set MAC address while compiling application for sender device
+            Set channel with less interference while compiling application for receiver device
 
-    config CSI_RECV_MAC
-        string "Receiver MAC address"
-        default "AAABBB"
+    config SEND_FREQUENCY
+        int "Sender frequency"
+        default 100
         help
-            Set MAC address while compiling application for receiver device
+            Set frequency while compiling application for sender device
 endmenu

@@ -6,42 +6,41 @@
 #include "esp_log.h"
 
 #include "init_manager.h"
-#include "main.h"
 #include "task_prio.h"
-
-#if defined CONFIG_CSI_APP_RECEIVER
-#include "recv_manager.h"
-#endif
+#include "csi_manager.h"
 
 ESP_EVENT_DEFINE_BASE(INIT_MANAGER_EVENTS);
 
 const char *init_tag = "init_manager";
 
+#if defined CONFIG_CSI_APP_SENDER
+
+#endif
+
 void wifi_init_task(void *arg)
 {
     (void)arg;
-
     ESP_ERROR_CHECK(esp_netif_init());
-    wifi_init_config_t wifi_cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&wifi_cfg));
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_bandwidth(ESP_IF_WIFI_STA, WIFI_BW_HT40));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    // TODO: Add rate if needed
-    // ESP_ERROR_CHECK(esp_wifi_config_espnow_rate(ESP_IF_WIFI_STA, WIFI_PHY_RATE_MCS0_SGI));
+    // TODO: replace this with NOT deprecated function
+    ESP_ERROR_CHECK(esp_wifi_config_espnow_rate(ESP_IF_WIFI_STA, WIFI_PHY_RATE_MCS0_SGI));
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+
+    ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_LESS_INTERFERENCE_CHANNEL, WIFI_SECOND_CHAN_BELOW));
     ESP_ERROR_CHECK(esp_now_init());
 
-    // TODO: add the channel and MAC address configuration to the menuconfig
-    // ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_LESS_INTERFERENCE_CHANNEL, WIFI_SECOND_CHAN_BELOW));
-
 #if defined CONFIG_CSI_APP_SENDER
-    ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CONFIG_CSI_SEND_MAC));
+    ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CSI_SEND_MAC));
+    ESP_ERROR_CHECK(esp_now_add_peer(&peer));
 #elif defined CONFIG_CSI_APP_RECEIVER
-    ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CONFIG_CSI_RECV_MAC));
+    ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, peer.peer_addr));
 #endif
 
     vTaskDelete(NULL);

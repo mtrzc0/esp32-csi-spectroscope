@@ -1,21 +1,49 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
-#include "nvs_flash.h"
 #include "esp_mac.h"
-#include "rom/ets_sys.h"
 #include "esp_log.h"
 #include "esp_wifi.h"
-#include "esp_netif.h"
 #include "esp_now.h"
 
+#include "rom/ets_sys.h"
+#include "esp_netif.h"
+
+#include "csi_manager.h"
+
+static const char *csi_send_tag = "send_manager";
+
+uint8_t CSI_SEND_MAC[6] = {0x1A, 0xFF, 0x35, 0x24, 0x46, 0x68};
+
+esp_now_peer_info_t peer = {
+    .channel   = CONFIG_LESS_INTERFERENCE_CHANNEL,
+    .ifidx     = WIFI_IF_STA,
+    .encrypt   = false,
+    .peer_addr = {0x1A, 0xFE, 0x34, 0x23, 0x45, 0x67},
+};
+
+void csi_send_task(void *arg)
+{
+    (void)arg;
+
+    // TODO: add PMK to the menuconfig
+    //ESP_ERROR_CHECK(esp_now_set_pmk((uint8_t *)"pmk1234567890123"));
+
+    ESP_LOGI(csi_send_tag, "================ CSI SEND ================");
+    ESP_LOGI(csi_send_tag, "wifi_channel: %d, send_frequency: %d, mac: " MACSTR,
+             CONFIG_LESS_INTERFERENCE_CHANNEL, CONFIG_SEND_FREQUENCY, MAC2STR(CSI_SEND_MAC));
+
+    for (uint8_t data = 0;;data++)
+    {
+        ESP_LOGD(csi_send_tag, "Sending data to " MACSTR, MAC2STR(peer.peer_addr));
+        ESP_ERROR_CHECK(esp_now_send(peer.peer_addr, &data, sizeof(uint8_t)));
+        vTaskDelay(CONFIG_SEND_FREQUENCY / portTICK_PERIOD_MS);
+    }
+}
+
 static const char *csi_recv_tag = "recv_manager";
-
-#define CONFIG_LESS_INTERFERENCE_CHANNEL    11
-#define CONFIG_SEND_FREQUENCY               100
-
-static uint8_t CSI_SEND_MAC[6] = CONFIG_CSI_SEND_MAC;
 
 void csi_recv_cb(void *ctx, wifi_csi_info_t *info)
 {

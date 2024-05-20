@@ -1,7 +1,5 @@
-if(CONFIG_CSI_APP_TYPE_SENDER)
-    list(APPEND srcs "send_manager.c")
-elseif (CONFIG_CSI_APP_TYPE_RECEIVER)
-    list(APPEND srcs "recv_manager.c")
+if(CONFIG_CSI_APP_TYPE_SENDER OR CONFIG_CSI_APP_TYPE_RECEIVER)
+    list(APPEND srcs "csi_manager.c")
 endif()
 
 idf_component_register(SRCS ${srcs}
