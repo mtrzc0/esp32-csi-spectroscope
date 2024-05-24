@@ -14,10 +14,15 @@ ESP_EVENT_DECLARE_BASE(APP_MAIN_EVENTS);
  * - INIT_MANAGER_ANY_EVENT: This event is a catch-all for any event posted to the APP_MAIN_EVENTS event base.
  */
 typedef enum {
-    INIT_MANAGER_RUN_EVENT,
+    WIFI_INIT_SUCCESS_EVENT,
+    CSI_RECV_INIT_SUCCESS_EVENT,
+    NVS_INIT_SUCCESS_EVENT,
+    INITS_SUCCESS,
+    INITS_FAIL,
+    INIT_MANAGER_ANY_EVENT,
     INIT_MANAGER_SUCCESS_EVENT,
     INIT_MANAGER_FAIL_EVENT,
     APP_MAIN_ANY_EVENT,
-}app_main_events_t;
+}app_main_flags_t;
 
 #endif //MAIN_H
