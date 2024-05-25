@@ -6,6 +6,7 @@
 #include "esp_log.h"
 
 #include "init_manager.h"
+#include "csi_manager.h"
 #include "main.h"
 
 const char *init_tag = "init_manager";
@@ -29,24 +30,14 @@ void wifi_init()
     ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_LESS_INTERFERENCE_CHANNEL, WIFI_SECOND_CHAN_BELOW));
     ESP_ERROR_CHECK(esp_now_init());
 
-#if defined CONFIG_CSI_APP_SENDER
     ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CSI_SEND_MAC));
-    if (peer == NULL)
-    {
-        ESP_LOGE(init_tag, "Peer is NULL.");
-        return;
-    }
-    ESP_ERROR_CHECK(esp_now_add_peer(&peer));
-#elif defined CONFIG_CSI_APP_RECEIVER
-    ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, peer.peer_addr));
-#endif
 
     esp_event_post(APP_MAIN_EVENTS, WIFI_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 }
 
 void csi_recv_init()
 {
-#if defined CONFIG_CSI_APP_RECEIVER
+#if defined CONFIG_CSI_APP_TYPE_RECEIVER
     ESP_LOGD(init_tag, "CSI RECV init start");
     ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
     // ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(g_wifi_radar_config->wifi_sniffer_cb));

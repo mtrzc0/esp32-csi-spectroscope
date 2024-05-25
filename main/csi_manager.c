@@ -13,7 +13,7 @@
 
 #include "csi_manager.h"
 
-static const char *csi_send_tag = "send_manager";
+static const char *csi_send_tag = "csi_send";
 
 uint8_t CSI_SEND_MAC[6] = {0x1A, 0xFF, 0x35, 0x24, 0x46, 0x68};
 
@@ -21,7 +21,7 @@ esp_now_peer_info_t peer = {
     .channel   = CONFIG_LESS_INTERFERENCE_CHANNEL,
     .ifidx     = WIFI_IF_STA,
     .encrypt   = false,
-    .peer_addr = {0x1A, 0xFE, 0x34, 0x23, 0x45, 0x67},
+    .peer_addr = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 };
 
 void csi_send_task(void *arg)
@@ -45,7 +45,7 @@ void csi_send_task(void *arg)
     }
 }
 
-static const char *csi_recv_tag = "recv_manager";
+static const char *csi_recv_tag = "csi_recv";
 
 void csi_recv_cb(void *ctx, wifi_csi_info_t *info)
 {
