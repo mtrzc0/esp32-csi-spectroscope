@@ -14,7 +14,7 @@ void wifi_init()
 {
     ESP_LOGD(init_tag, "WIFI init start.");
     ESP_ERROR_CHECK(esp_netif_init());
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    const wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
@@ -31,20 +31,23 @@ void wifi_init()
 
 #if defined CONFIG_CSI_APP_SENDER
     ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, CSI_SEND_MAC));
+    if (peer == NULL)
+    {
+        ESP_LOGE(init_tag, "Peer is NULL.");
+        return;
+    }
     ESP_ERROR_CHECK(esp_now_add_peer(&peer));
 #elif defined CONFIG_CSI_APP_RECEIVER
     ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, peer.peer_addr));
 #endif
 
     esp_event_post(APP_MAIN_EVENTS, WIFI_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
-
-    vTaskDelete(NULL);
 }
 
 void csi_recv_init()
 {
-    ESP_LOGD(init_tag, "CSI RECV init start");
 #if defined CONFIG_CSI_APP_RECEIVER
+    ESP_LOGD(init_tag, "CSI RECV init start");
     ESP_ERROR_CHECK(esp_wifi_set_promiscuous(true));
     // ESP_ERROR_CHECK(esp_wifi_set_promiscuous_rx_cb(g_wifi_radar_config->wifi_sniffer_cb));
 
@@ -61,9 +64,9 @@ void csi_recv_init()
     ESP_ERROR_CHECK(esp_wifi_set_csi_config(&cfg));
     ESP_ERROR_CHECK(esp_wifi_set_csi_rx_cb(csi_recv_cb, NULL));
     ESP_ERROR_CHECK(esp_wifi_set_csi(true));
-#endif
 
     esp_event_post(APP_MAIN_EVENTS, CSI_RECV_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
+#endif
 }
 
 void nvs_init()
@@ -75,7 +78,12 @@ void nvs_init()
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
-    ESP_ERROR_CHECK(ret);
+
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(init_tag, "NVS init failed.");
+        return;
+    }
 
     esp_event_post(APP_MAIN_EVENTS, NVS_INIT_SUCCESS_EVENT, NULL, 0, portMAX_DELAY);
 }

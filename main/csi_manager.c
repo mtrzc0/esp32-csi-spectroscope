@@ -31,6 +31,8 @@ void csi_send_task(void *arg)
     // TODO: add PMK to the menuconfig
     //ESP_ERROR_CHECK(esp_now_set_pmk((uint8_t *)"pmk1234567890123"));
 
+    ESP_ERROR_CHECK(esp_now_add_peer(&peer));
+
     ESP_LOGI(csi_send_tag, "================ CSI SEND ================");
     ESP_LOGI(csi_send_tag, "wifi_channel: %d, send_frequency: %d, mac: " MACSTR,
              CONFIG_LESS_INTERFERENCE_CHANNEL, CONFIG_SEND_FREQUENCY, MAC2STR(CSI_SEND_MAC));

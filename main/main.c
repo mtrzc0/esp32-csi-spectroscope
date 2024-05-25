@@ -10,7 +10,7 @@ ESP_EVENT_DEFINE_BASE(APP_MAIN_EVENTS);
 
 const char* main_tag = "main";
 
-static int8_t inits_counter = -1;
+static uint8_t inits_counter = 0;
 
 static void init_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
@@ -32,13 +32,18 @@ static void init_handler(void* arg, esp_event_base_t event_base, int32_t event_i
 			ESP_LOGE(main_tag, "Init manager failed.");
 			break;
         case WIFI_INIT_SUCCESS_EVENT:
-        	inits_counter = WIFI_INIT_SUCCESS_EVENT;
+        	inits_counter++;
+			ESP_LOGI(main_tag, "WIFI init success.");
         	break;
+#if defined CONFIG_CSI_APP_TYPE_RECEIVER
         case CSI_RECV_INIT_SUCCESS_EVENT:
-        	inits_counter += CSI_RECV_INIT_SUCCESS_EVENT;
+        	inits_counter++;
+			ESP_LOGI(main_tag, "CSI RECV init success.");
         	break;
+#endif
         case NVS_INIT_SUCCESS_EVENT:
-        	inits_counter += NVS_INIT_SUCCESS_EVENT;
+        	inits_counter++;
+			ESP_LOGI(main_tag, "NVS init success.");
         	break;
         default:
 			ESP_LOGW(main_tag, "Unknown event");
@@ -53,10 +58,12 @@ void app_main()
 	esp_event_loop_create_default();
 	esp_event_handler_instance_register(APP_MAIN_EVENTS, NVS_INIT_SUCCESS_EVENT, init_handler, NULL, NULL);
 	esp_event_handler_instance_register(APP_MAIN_EVENTS, WIFI_INIT_SUCCESS_EVENT, init_handler, NULL, NULL);
+#if defined CONFIG_CSI_APP_TYPE_RECEIVER
 	esp_event_handler_instance_register(APP_MAIN_EVENTS, CSI_RECV_INIT_SUCCESS_EVENT, init_handler, NULL, NULL);
+#endif
 	esp_event_handler_instance_register(APP_MAIN_EVENTS, INIT_MANAGER_SUCCESS_EVENT, init_handler, NULL, NULL);
 	esp_event_handler_instance_register(APP_MAIN_EVENTS, INIT_MANAGER_FAIL_EVENT, init_handler, NULL, NULL);
-
+	esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, init_handler, NULL, NULL);
 
 	// Initialize all drivers
 	nvs_init();
